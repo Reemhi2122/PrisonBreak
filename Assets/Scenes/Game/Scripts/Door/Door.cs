@@ -6,9 +6,10 @@ public class Door : MonoBehaviour, IInteractable
 {
 
     public DoorType type;
-    int CellDoorId;
-    float health;
-    bool isOpen;
+    private int CellDoorId;
+    private float health;
+    private bool isOpen;
+    private bool isAnimating;
 
     LTDescr _tween;
 
@@ -36,22 +37,40 @@ public class Door : MonoBehaviour, IInteractable
 
     public void Open()
     {
-        _tween = LeanTween.moveX(this.gameObject, (this.transform.transform.position.x - 1.5f), 0.5f);
-        isOpen = true;
+        if (!isOpen)
+        {
+            isAnimating = true;
+            _tween = LeanTween.moveLocalX(this.gameObject, (this.transform.transform.localPosition.x - 1.5f), 0.5f);
+            _tween.setOnComplete(() =>
+            {
+                isAnimating = false;
+            });
+            isOpen = true;
+        }
     }
 
     public void Close()
     {
-        _tween = LeanTween.moveX(this.gameObject, (this.gameObject.transform.position.x + 1.5f), 0.5f);
-        isOpen = false;
+        if (isOpen)
+        {
+            isAnimating = true;
+            _tween = LeanTween.moveLocalX(this.gameObject, (this.gameObject.transform.localPosition.x + 1.5f), 0.5f);
+            _tween.setOnComplete(() =>
+            {
+                isAnimating = false;
+            });
+            isOpen = false;
+        }
     }
 
     public void Action()
     {
-        if (isOpen) {
-            Close();
-        } else {
-            Open();
+        if (!isAnimating)
+        {
+            if (isOpen)
+                Close();
+            else
+                Open();
         }
     }
 }

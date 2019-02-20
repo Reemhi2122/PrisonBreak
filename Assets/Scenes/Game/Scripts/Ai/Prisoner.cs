@@ -1,22 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Prisoner : Human
 {
+    private Prison curPrison;
 
-    private int cellNum;
-
-    public Prisoner(uint weight, uint health, uint armor, int cellNum) : base(weight, health, armor)
+    public Prisoner(string hName, uint weight, uint health, uint armor, int skinColor, int authority) : base(hName, weight, health, armor, skinColor, authority)
     {
-        this.cellNum = cellNum;
+
     }
 
-    public int GetCellNum(){
-        return cellNum;
+    public Prison GetPrison(){
+        return curPrison;
     }
 
-    public void SetCellNum(int cellNum){
-        this.cellNum = cellNum;
+    public void SetPrison(Prison prison){
+        this.curPrison = prison;
     }
 }

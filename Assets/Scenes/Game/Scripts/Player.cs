@@ -12,8 +12,7 @@ public class Player : MonoBehaviour
         Move();
         Rotate();
 
-        if (Input.GetMouseButtonDown(0))
-        {
+        if (Input.GetMouseButtonDown(0)){
             SendRay();
         }
     }

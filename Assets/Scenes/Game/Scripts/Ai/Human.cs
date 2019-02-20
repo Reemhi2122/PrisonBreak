@@ -1,26 +1,31 @@
 ﻿using UnityEngine;
 
-public abstract class Human : MonoBehaviour 
+public abstract class Human
 {
-    private string hName;
-    private uint weight;
-    private uint health;
-    private uint armor;
-    private bool isAlive;
+    protected string hName;
+    protected uint weight;
+    protected uint health;
+    protected uint armor;
+    protected bool isAlive;
     [Range(-1, 1)]
-    private int skinColor;
-    private int authority;
-    private float hunger;
-    private float sleep;
+    protected int skinColor;
+    protected int authority;
+    protected float hunger;
+    protected float sleep;
 
     /// <summary>
-    /// 
+    ///     Create a human.
     /// </summary>
     /// <param name="weight"></param>
     /// <param name="health"></param>
     /// <param name="armor"></param>
-    public Human(uint weight, uint health, uint armor){
+    public Human(string hName, uint weight, uint health, uint armors, int skinColor, int authority)
+    {
+        
+    }
 
+    public Human()  {
+        
     }
 
     #region GETANDSET
