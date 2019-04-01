@@ -6,6 +6,8 @@ public class Door : MonoBehaviour, IInteractable
 {
 
     public DoorType type;
+    public OpenType openType;
+    public DoorSecurityType doorSecurityType;
     private int CellDoorId;
     private float health;
     private bool isOpen;
@@ -37,29 +39,44 @@ public class Door : MonoBehaviour, IInteractable
 
     public void Open()
     {
-        if (!isOpen)
-        {
-            isAnimating = true;
-            _tween = LeanTween.moveLocalX(this.gameObject, (this.transform.transform.localPosition.x - 1.5f), 0.5f);
-            _tween.setOnComplete(() =>
+        if (doorSecurityType == DoorSecurityType.NoSecurity || Inventory.instance.HasKey(doorSecurityType)) {
+            if (!isOpen)
             {
-                isAnimating = false;
-            });
-            isOpen = true;
+                isAnimating = true;
+
+                if (openType == OpenType.X)
+                    _tween = LeanTween.moveLocalX(this.gameObject, (this.transform.transform.localPosition.x - 1.5f), 0.5f);
+                else if (openType == OpenType.Z)
+                    _tween = LeanTween.moveLocalZ(this.gameObject, (this.transform.transform.localPosition.z - 1.5f), 0.5f);
+
+                _tween.setOnComplete(() =>
+                {
+                    isAnimating = false;
+                });
+                isOpen = true;
+            }
         }
     }
 
     public void Close()
     {
-        if (isOpen)
+        if (doorSecurityType == DoorSecurityType.NoSecurity || Inventory.instance.HasKey(doorSecurityType))
         {
-            isAnimating = true;
-            _tween = LeanTween.moveLocalX(this.gameObject, (this.gameObject.transform.localPosition.x + 1.5f), 0.5f);
-            _tween.setOnComplete(() =>
+            if (isOpen)
             {
-                isAnimating = false;
-            });
-            isOpen = false;
+                isAnimating = true;
+
+                if (openType == OpenType.X)
+                    _tween = LeanTween.moveLocalX(this.gameObject, (this.gameObject.transform.localPosition.x + 1.5f), 0.5f);
+                else if (openType == OpenType.Z)
+                    _tween = LeanTween.moveLocalZ(this.gameObject, (this.gameObject.transform.localPosition.z + 1.5f), 0.5f);
+
+                _tween.setOnComplete(() =>
+                {
+                    isAnimating = false;
+                });
+                isOpen = false;
+            }
         }
     }
 
@@ -82,4 +99,17 @@ public enum DoorType
     MANAGERDOOR,
     CELLDOOR,
     ISOLATEDOOR
+}
+
+public enum OpenType
+{
+    X,
+    Z
+}
+
+public enum DoorSecurityType
+{
+    NoSecurity,
+    MediumSecurity,
+    HeavySecurity
 }

@@ -1,5 +1,4 @@
 ﻿using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 
 [CustomEditor(typeof(PrisonArchive))]
@@ -16,6 +15,11 @@ public class PrisonArchiveEditor : Editor
         EditorGUILayout.PropertyField(PrisonList, new GUIContent("PrisonList"), true);
         if(GUILayout.Button("PutinPrison")){
             FindPrisons();
+        }
+
+        if(GUILayout.Button("SetAllPrisonProperties")){
+            GameObject gameObject = Selection.activeGameObject;
+            gameObject.GetComponent<PrisonArchive>().AddAllPrisonProperties();
         }
 
         serializedObject.ApplyModifiedProperties();   

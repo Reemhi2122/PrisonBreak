@@ -2,16 +2,14 @@
 
 public abstract class Human
 {
-    protected string hName;
+    public string hName;
     protected uint weight;
     protected uint health;
     protected uint armor;
     protected bool isAlive;
     [Range(-1, 1)]
-    protected int skinColor;
+    protected float skinColor;
     protected int authority;
-    protected float hunger;
-    protected float sleep;
 
     /// <summary>
     ///     Create a human.
@@ -19,9 +17,14 @@ public abstract class Human
     /// <param name="weight"></param>
     /// <param name="health"></param>
     /// <param name="armor"></param>
-    public Human(string hName, uint weight, uint health, uint armors, int skinColor, int authority)
+    public Human(string hName, uint weight, uint health, uint armor, float skinColor, int authority)
     {
-        
+        this.hName = hName;
+        this.weight = weight;
+        this.health = health;
+        this.armor = armor;
+        this.skinColor = skinColor;
+        this.authority = authority;
     }
 
     public Human()  {
@@ -29,6 +32,10 @@ public abstract class Human
     }
 
     #region GETANDSET
+
+    public string GetName(){
+        return hName;
+    }
 
     /// <summary>
     /// Get the health of the human.
@@ -121,51 +128,12 @@ public abstract class Human
     }
 
     /// <summary>
-    /// Get the hunger of the player;
+    /// Returns skincolor.
     /// </summary>
-    /// <returns>The hunger of the player</returns>
-    public float GetHunger()
+    /// <returns>the skin color</returns>
+    public float GetSkinColor()
     {
-        return hunger;
-    }
-
-    /// <summary>
-    /// Set the hunger of the player;
-    /// </summary>
-    /// <param name="hunger"></param>
-    public void SetHunger(float hunger)
-    {
-        this.hunger = hunger;
-    }
-
-    /// <summary>
-    /// Get the sleep of the human.
-    /// </summary>
-    /// <returns>The sleep of the human</returns>
-    public float GetSleep()
-    {
-        return sleep;
-    }
-
-    /// <summary>
-    /// Set the sleep of the human.
-    /// </summary>
-    /// <param name="sleep"></param>
-    public void SetSleep(float sleep)
-    {
-        this.sleep = sleep;
-    }
-
-    #endregion
-
-    #region Methods
-
-    private void SetSkinColor(int skinColor)
-    {
-        if (skinColor < 0)
-        {
-
-        }
+        return this.skinColor;
     }
 
     #endregion

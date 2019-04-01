@@ -12,6 +12,9 @@ public class Inventory : MonoBehaviour
     public float MaximumWeight = 10.0f;
     public float TotalWeight;
 
+    public int equipedItem = 0;
+    public Image equipindc;
+
     void Awake(){
         if(instance == null){
             instance = this;
@@ -37,6 +40,7 @@ public class Inventory : MonoBehaviour
     public void RemoveItem(Item item){
         items.Remove(item);
         TotalWeight -= item.weight;
+
     }
 
     public void DisplayItem(Item item){
@@ -50,19 +54,26 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    ///<summary>
-    ///This function checks if you have the right key in the inventory
-    ///</summary>
-    public bool HasKey(int CDid){
+    public bool HasKey(DoorSecurityType SDT){
         for (int i = 0; i < items.Count; i++)
         {
-            if(items[0].name.Equals(CDid)){
-                // TODO: make more complicated items and make this return true if the item is a key
-                // and has the right id.
+            if (items[i] is KeyItem)
+            {
+                KeyItem ci = (KeyItem)items[i];
+                if (ci.keyType == SDT)
+                {
+                    return true;
+                }
             }
         }
 
         return false;
+    }
+
+    public void ChangeSelected(int selected)
+    {
+        equipedItem = selected;
+        equipindc.transform.position = invSpaces[selected].transform.position;
     }
 
 }

@@ -5,15 +5,74 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public Camera PlayerCamera;
-    private float speed = 5;
+
+    private float normalSpeed;
+    private float speed;
+    private float FastForwardSpeedMultiplier;
+    private float SprintMuliplier;
+
+    private bool gamePaused;
+    private bool FastForwardEnabled;
+
+    private Rigidbody rb;
+
+    private void Start()
+    {
+        normalSpeed = 5;
+        speed = normalSpeed;
+        FastForwardSpeedMultiplier = 2;
+        SprintMuliplier = 1.5f;
+        rb = GetComponent<Rigidbody>();
+    }
+
+    private void OnEnable()
+    {
+        GameManager.OnGameStateChanged += GameStateChanged;
+        Clock.OnFastForward += SetFastForward;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.OnGameStateChanged -= GameStateChanged;
+        Clock.OnFastForward -= SetFastForward;
+    }
 
     void Update()
     {
-        Move();
-        Rotate();
+        if (!gamePaused) {
+            Move();
+            Rotate();
+        }
+        if (Input.GetMouseButtonDown(0)) SendRay();
+        if (Input.GetKeyDown(KeyCode.LeftShift)) speed *= SprintMuliplier;
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            if (FastForwardEnabled) speed = normalSpeed * FastForwardSpeedMultiplier;
+            else speed = normalSpeed;
+        }
+    }
 
-        if (Input.GetMouseButtonDown(0)){
-            SendRay();
+    private void SetFastForward(bool enabled)
+    {
+        if (enabled) speed *= 2;
+        else speed = normalSpeed;
+
+        FastForwardEnabled = enabled;
+    }
+
+    private void GameStateChanged(GameState state)
+    {
+        switch (state)
+        {
+            case GameState.Init:
+                break;
+            case GameState.Pause:
+                gamePaused = true;
+                break;
+            case GameState.Play:
+                gamePaused = false;
+                break;
+
         }
     }
 
@@ -44,9 +103,9 @@ public class Player : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
-            if (hit.transform.CompareTag("Interactable"))
+            if (hit.transform.CompareTag("Interactable") || hit.transform.CompareTag("ShowerHead"))
             {
-                if (Vector3.Distance(this.transform.position, hit.transform.position) < 4)
+                if (Vector3.Distance(this.transform.position, hit.transform.position) < 3)
                 {
                     hit.transform.gameObject.GetComponent<IInteractable>().Action();
                 }

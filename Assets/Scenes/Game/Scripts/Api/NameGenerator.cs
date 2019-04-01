@@ -12,15 +12,12 @@ public class NameGenerator
     {
         if (names.Count == 0)
         {
-            List<string> names = new List<string>();
             StreamReader sr = File.OpenText(Application.streamingAssetsPath + "/Names.txt");
             names = sr.ReadToEnd().Split("\n"[0]).ToList();
         }
 
-        int randNum = Random.Range(1, names.Count + 1);
+        int randNum = Random.Range(1, names.Count);
         string curName = names[randNum];
-        names.Remove(names[randNum]);
         return curName;
-
     }
 }
