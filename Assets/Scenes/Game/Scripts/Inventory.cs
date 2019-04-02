@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
+using TMPro;
 
 public class Inventory : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class Inventory : MonoBehaviour
 
     public int equipedItem = 0;
     public Image equipindc;
+
+    public TMP_Text InvText;
 
     void Awake(){
         if(instance == null){
@@ -33,7 +36,8 @@ public class Inventory : MonoBehaviour
 
         items.Add(item);
         TotalWeight += item.weight;
-        DisplayItem(item);      
+        DisplayItem(item);
+        InvText.text = equipedItem <= (items.Count - 1) ? items[equipedItem].name : "Fist";
         return true;
     }
 
@@ -74,6 +78,7 @@ public class Inventory : MonoBehaviour
     {
         equipedItem = selected;
         equipindc.transform.position = invSpaces[selected].transform.position;
+        InvText.text = equipedItem <= (items.Count - 1) ? items[equipedItem].name : "Fist";
     }
 
 }

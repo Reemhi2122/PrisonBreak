@@ -10,7 +10,7 @@ public class Door : MonoBehaviour, IInteractable
     public DoorSecurityType doorSecurityType;
     private int CellDoorId;
     private float health;
-    private bool isOpen;
+    public bool isOpen;
     private bool isAnimating;
 
     LTDescr _tween;
@@ -82,6 +82,7 @@ public class Door : MonoBehaviour, IInteractable
 
     public void Action()
     {
+        Debug.Log("hai");
         if (!isAnimating)
         {
             if (isOpen)

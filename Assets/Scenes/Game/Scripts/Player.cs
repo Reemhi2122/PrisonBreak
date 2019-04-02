@@ -14,6 +14,9 @@ public class Player : MonoBehaviour
     private bool gamePaused;
     private bool FastForwardEnabled;
 
+    private Prison pPrison;
+    public PersonShow show;
+
     private Rigidbody rb;
 
     private void Start()
@@ -23,6 +26,8 @@ public class Player : MonoBehaviour
         FastForwardSpeedMultiplier = 2;
         SprintMuliplier = 1.5f;
         rb = GetComponent<Rigidbody>();
+        pPrison = PrisonArchive.instance.GetFreePrison();
+        this.transform.position = pPrison.transform.position;
     }
 
     private void OnEnable()
@@ -105,10 +110,15 @@ public class Player : MonoBehaviour
         {
             if (hit.transform.CompareTag("Interactable") || hit.transform.CompareTag("ShowerHead"))
             {
+                Debug.Log("touch");
                 if (Vector3.Distance(this.transform.position, hit.transform.position) < 3)
                 {
                     hit.transform.gameObject.GetComponent<IInteractable>().Action();
                 }
+            }
+            if (hit.transform.CompareTag("Prisoner"))
+            {
+                show.SetupPersonWindow(hit.transform.gameObject.GetComponent<PrisonerNPC>().GetPrisonerClass());
             }
         }
     }

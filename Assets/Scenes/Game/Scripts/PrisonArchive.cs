@@ -29,7 +29,7 @@ public class PrisonArchive : MonoBehaviour
 
     private void OnDisable()
     {
-        
+        EventManager.OnPrisonStateChanged -= OnEvent;
     }
 
     private void OnEvent(PrisonState type)
