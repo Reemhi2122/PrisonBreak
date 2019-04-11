@@ -82,7 +82,6 @@ public class Door : MonoBehaviour, IInteractable
 
     public void Action()
     {
-        Debug.Log("hai");
         if (!isAnimating)
         {
             if (isOpen)

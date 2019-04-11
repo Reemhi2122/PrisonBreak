@@ -17,7 +17,7 @@ public class Player : MonoBehaviour
     private Prison pPrison;
     public PersonShow show;
 
-    private Rigidbody rb;
+    private Rigidbody rb2d;
 
     private void Start()
     {
@@ -25,7 +25,7 @@ public class Player : MonoBehaviour
         speed = normalSpeed;
         FastForwardSpeedMultiplier = 2;
         SprintMuliplier = 1.5f;
-        rb = GetComponent<Rigidbody>();
+        rb2d = GetComponent<Rigidbody>();
         pPrison = PrisonArchive.instance.GetFreePrison();
         this.transform.position = pPrison.transform.position;
     }
@@ -83,9 +83,10 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        this.transform.position += new Vector3(horizontal, 0, vertical) * speed * Time.deltaTime;
+        float moveHorizontal = Input.GetAxis("Horizontal");
+        float moveVertical = Input.GetAxis("Vertical");
+
+        transform.Translate(new Vector3(moveHorizontal, 0, moveVertical) * speed * Time.deltaTime);
     }
 
     private void Rotate()
@@ -108,15 +109,14 @@ public class Player : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
-            if (hit.transform.CompareTag("Interactable") || hit.transform.CompareTag("ShowerHead"))
+            if (hit.collider.transform.CompareTag("Interactable") || hit.collider.transform.CompareTag("ShowerHead"))
             {
-                Debug.Log("touch");
-                if (Vector3.Distance(this.transform.position, hit.transform.position) < 3)
+                if (Vector3.Distance(this.transform.position, hit.collider.transform.position) < 3)
                 {
-                    hit.transform.gameObject.GetComponent<IInteractable>().Action();
+                    hit.collider.transform.gameObject.GetComponent<IInteractable>().Action();
                 }
             }
-            if (hit.transform.CompareTag("Prisoner"))
+            if (hit.collider.transform.CompareTag("Prisoner"))
             {
                 show.SetupPersonWindow(hit.transform.gameObject.GetComponent<PrisonerNPC>().GetPrisonerClass());
             }
