@@ -8,6 +8,8 @@ TagManager:
   - ShowerHead
   - Prisoner
   - CanteenChair
+  - Terrain
+  - Object
   layers:
   - Default
   - TransparentFX
