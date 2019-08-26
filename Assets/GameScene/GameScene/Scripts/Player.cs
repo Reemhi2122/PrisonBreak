@@ -15,7 +15,6 @@ public class Player : MonoBehaviour
     private bool FastForwardEnabled;
 
     private Prison pPrison;
-    public PersonShow show;
 
     private Rigidbody rb2d;
 
@@ -118,7 +117,7 @@ public class Player : MonoBehaviour
             }
             if (hit.collider.transform.CompareTag("Prisoner"))
             {
-                show.SetupPersonWindow(hit.transform.gameObject.GetComponent<PrisonerNPC>().GetPrisonerClass());
+                Debug.Log("prisoner selected");
             }
         }
     }

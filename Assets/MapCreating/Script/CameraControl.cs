@@ -69,7 +69,8 @@ public class CameraControl : MonoBehaviour
                 _selectMaterial.color = new Color32(242, 38, 19, 150);
         }
 
-        selectionCube.transform.position = new Vector3(Mathf.RoundToInt(mousePos.x), 15, Mathf.RoundToInt(mousePos.z));
+        //TODO: Make a positioner for the selection cube when picking a bigger object.
+        selectionCube.transform.position = new Vector3(Mathf.RoundToInt(mousePos.x) + (_heldgameObject.transform.localScale.x / 4), 15, Mathf.RoundToInt(mousePos.z));
     }
 
     private void Move()
