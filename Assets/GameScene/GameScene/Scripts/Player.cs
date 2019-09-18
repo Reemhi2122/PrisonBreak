@@ -16,7 +16,7 @@ public class Player : MonoBehaviour
 
     private Prison pPrison;
 
-    private Rigidbody rb2d;
+    private Rigidbody rb;
 
     private void Start()
     {
@@ -24,7 +24,7 @@ public class Player : MonoBehaviour
         speed = normalSpeed;
         FastForwardSpeedMultiplier = 2;
         SprintMuliplier = 1.5f;
-        rb2d = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
         pPrison = PrisonArchive.instance.GetFreePrison();
         this.transform.position = pPrison.transform.position;
     }
@@ -41,18 +41,26 @@ public class Player : MonoBehaviour
         Clock.OnFastForward -= SetFastForward;
     }
 
-    void Update()
+    private void Update()
     {
         if (!gamePaused) {
-            Move();
             Rotate();
+            Move();
         }
+
         if (Input.GetMouseButtonDown(0)) SendRay();
         if (Input.GetKeyDown(KeyCode.LeftShift)) speed *= SprintMuliplier;
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             if (FastForwardEnabled) speed = normalSpeed * FastForwardSpeedMultiplier;
             else speed = normalSpeed;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (!gamePaused)
+        {
         }
     }
 
@@ -82,10 +90,15 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
 
-        transform.Translate(new Vector3(moveHorizontal, 0, moveVertical) * speed * Time.deltaTime);
+        Vector3 movementHorizontal = transform.right * horizontal;
+        Vector3 movementVertical = transform.forward * vertical;
+
+        Vector3 velocity = (movementHorizontal + movementVertical).normalized;
+
+        rb.MovePosition(transform.position + velocity * speed * Time.deltaTime);
     }
 
     private void Rotate()

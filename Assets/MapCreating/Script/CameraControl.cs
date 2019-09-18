@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class CameraControl : MonoBehaviour
 {
@@ -17,6 +19,10 @@ public class CameraControl : MonoBehaviour
     public float Speed;
     public float ScrollSpeed;
 
+    private bool isHorizontal;
+
+    private Color32 SCGreen, SCRed;
+
     private readonly int _camHeight = 20;
 
     private bool _paused;
@@ -29,10 +35,14 @@ public class CameraControl : MonoBehaviour
 
     private void Start()
     {
-        _map = new Map(200, "MyPrison");
+        _map = new Map("MyPrison");
         _camera = this.GetComponent<Camera>();
         _selectMaterial = selectionCube.GetComponent<MeshRenderer>().material;
         _heldgameObject = PlaceObjects[0];
+
+        isHorizontal = true;
+        SCGreen = new Color32(46, 204, 113, 100);
+        SCRed = new Color32(242, 38, 19, 150);
     }
 
     public void ChangeHeldObject(int index)
@@ -48,6 +58,7 @@ public class CameraControl : MonoBehaviour
         {
             if (Input.GetMouseButton(0)) PlaceItem();
             if (Input.GetMouseButton(1)) RemoveItem();
+            if (Input.GetKeyDown(KeyCode.R)) RotateItem(); 
             Move();
             Zoom();
             Selection();
@@ -64,13 +75,11 @@ public class CameraControl : MonoBehaviour
         if (Physics.Raycast(ray, out hit))
         {
             if (hit.transform.CompareTag("Terrain"))
-                _selectMaterial.color = new Color32(46, 204, 113, 100);
-            else 
-                _selectMaterial.color = new Color32(242, 38, 19, 150);
+                _selectMaterial.color = SCGreen;
+            else
+                _selectMaterial.color = SCRed;
         }
-
-        //TODO: Make a positioner for the selection cube when picking a bigger object.
-        selectionCube.transform.position = new Vector3(Mathf.RoundToInt(mousePos.x) + (_heldgameObject.transform.localScale.x / 4), 15, Mathf.RoundToInt(mousePos.z));
+        selectionCube.transform.position = new Vector3(Mathf.RoundToInt(mousePos.x) + (isHorizontal ? ((_heldgameObject.transform.localScale.x - 1) * 0.50f) : ((_heldgameObject.transform.localScale.z - 1) * 0.50f)), 15, Mathf.RoundToInt(mousePos.z) + (isHorizontal ? ((_heldgameObject.transform.localScale.z - 1) * 0.50f) : ((_heldgameObject.transform.localScale.x - 1) * 0.50f)));
     }
 
     private void Move()
@@ -90,6 +99,12 @@ public class CameraControl : MonoBehaviour
         _camera.orthographicSize = Mathf.Clamp(_camera.orthographicSize + -scroll * ScrollSpeed * Time.deltaTime, 3 , 100);
     }
 
+    private void RotateItem()
+    {
+        selectionCube.transform.Rotate(new Vector3(0,90,0));
+        isHorizontal = !isHorizontal;
+    }
+
     private void PlaceItem()
     {
         RaycastHit hit;
@@ -99,7 +114,8 @@ public class CameraControl : MonoBehaviour
         {
             if (hit.transform.CompareTag("Terrain") && !EventSystem.current.IsPointerOverGameObject())
             {
-                GameObject placedObj = Instantiate(_heldgameObject, new Vector3(Mathf.RoundToInt(hit.point.x), (_heldgameObject.transform.localScale.y / 2), Mathf.RoundToInt(hit.point.z)), Quaternion.identity, hit.transform);
+                GameObject placedObj = Instantiate(_heldgameObject, new Vector3(Mathf.RoundToInt(hit.point.x) + (isHorizontal ? ((_heldgameObject.transform.localScale.x - 1) * 0.50f) : ((_heldgameObject.transform.localScale.z - 1) * 0.50f)), (_heldgameObject.transform.localScale.y / 2), Mathf.RoundToInt(hit.point.z) + (isHorizontal ? ((_heldgameObject.transform.localScale.z - 1) * 0.50f) : ((_heldgameObject.transform.localScale.x - 1) * 0.50f))), Quaternion.identity, hit.transform);
+                if (!isHorizontal) placedObj.transform.Rotate(new Vector3(0, 90, 0));
                 _map.AddObject(placedObj);
             }
         }
@@ -118,5 +134,14 @@ public class CameraControl : MonoBehaviour
                 Destroy(hit.transform.gameObject);
             }
         }
+    }
+
+    public void SaveData()
+    {
+        if (!Directory.Exists("Saves"))
+            Directory.CreateDirectory("Saves");
+
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream saveFile = File.Create("Saves/" + _map.GetMapName() + ".binary");
     }
 }

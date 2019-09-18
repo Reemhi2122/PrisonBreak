@@ -8,18 +8,18 @@ public class Map
     private string _mapName;
     private GameObject[,] _map;
 
-    public Map(int a_Size, string a_Name)
+    public Map(string a_Name)
     {
-        _mapSize = a_Size;
         _mapName = a_Name;
-        InitMap();
+        _mapSize = 200;
+        _map = new GameObject[_mapSize, _mapSize];
     }
 
-    private void InitMap()
-    {
-        _map = new GameObject[_mapSize, _mapSize];
-        //Debug.Log("Map " + _mapName + " has been created!");
-    }
+    /// <summary>
+    /// Get the name of the selected map.
+    /// </summary>
+    /// <returns>Map name</returns>
+    public string GetMapName() { return _mapName; }
 
     // ----------- Logic ----------- \\
 
