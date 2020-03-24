@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Map
 {
     private int _mapSize;
     private string _mapName;
-    private GameObject[,] _map;
+
+    [HideInInspector]
+    public int[] _map;
 
     public Map(string a_Name)
     {
         _mapName = a_Name;
         _mapSize = 200;
-        _map = new GameObject[_mapSize, _mapSize];
+        _map = new int[_mapSize * _mapSize];
     }
 
     /// <summary>
@@ -27,14 +30,15 @@ public class Map
     {
         Vector3 pos = a_AddedItem.transform.position;
 
-        _map[(int)pos.x, (int)pos.z] = a_AddedItem;
+        //Debug.Log((int)pos.x + (int)pos.z * 100);
+        _map[(int)pos.x + (int)pos.z * 100] = a_AddedItem.GetComponent<Object>().objectID;
         //Debug.Log("Item: " + a_AddedItem + " has been added to the position: x " + pos.x + ", z " + pos.z + ". Map name: " + _mapName + ".");
     }
 
     public void RemoveObject(GameObject a_AddedItem)
     {
         Vector3 pos = a_AddedItem.transform.position;
-        _map[(int)pos.x, (int)pos.z] = null;
-        //Debug.Log("Item: " + a_AddedItem + " has been removed to the position: x " + pos.x + ", z " + pos.z + ". Map name: " + _mapName + ".");
+        _map[(int)pos.x + (int)pos.z * 100] = 0;
+        Debug.Log("Item: " + a_AddedItem + " has been removed to the position: x " + pos.x + ", z " + pos.z + ". Map name: " + _mapName + ".");
     }
 }

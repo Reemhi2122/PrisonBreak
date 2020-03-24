@@ -11,6 +11,8 @@ public class CameraControl : MonoBehaviour
     public GameObject selectionCube;
     public GameObject[] PlaceObjects;
 
+    public GameObject AreaPrefab;
+
     private Camera _camera;
     private Material _selectMaterial;
     private Map _map;
@@ -27,14 +29,15 @@ public class CameraControl : MonoBehaviour
 
     private bool _paused;
 
-    private void Awake()
-    {
-        int terrainDivider = 2;
-        this.transform.position = new Vector3((CurTerrain.terrainData.size.x / terrainDivider), _camHeight, (CurTerrain.terrainData.size.z / terrainDivider));
-    }
+    //temp
+    private Vector3 startPos;
+    private bool selectionDown;
 
     private void Start()
     {
+        int terrainDivider = 2;
+        this.transform.position = new Vector3((CurTerrain.terrainData.size.x / terrainDivider), _camHeight, (CurTerrain.terrainData.size.z / terrainDivider));
+
         _map = new Map("MyPrison");
         _camera = this.GetComponent<Camera>();
         _selectMaterial = selectionCube.GetComponent<MeshRenderer>().material;
@@ -48,8 +51,8 @@ public class CameraControl : MonoBehaviour
     public void ChangeHeldObject(int index)
     {
         _heldgameObject = PlaceObjects[index];
-        Vector3 scale = _heldgameObject.transform.localScale;
-        selectionCube.transform.localScale = new Vector3(scale.x, 0.5f, scale.z);
+        Object curObject = _heldgameObject.GetComponent<Object>();
+        selectionCube.transform.localScale = new Vector3(curObject.xSize, 0.5f, curObject.zSize);
     }
 
     private void Update()
@@ -58,10 +61,18 @@ public class CameraControl : MonoBehaviour
         {
             if (Input.GetMouseButton(0)) PlaceItem();
             if (Input.GetMouseButton(1)) RemoveItem();
+            if (Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftShift)) MakeSelection();
+            if (Input.GetMouseButtonUp(1)) EndSelection();
             if (Input.GetKeyDown(KeyCode.R)) RotateItem(); 
+            
+            //Basic movement
             Move();
             Zoom();
-            Selection();
+
+            if (selectionDown)
+                UpdateSelection();
+            else
+                Selection();
         }
     }
 
@@ -79,7 +90,12 @@ public class CameraControl : MonoBehaviour
             else
                 _selectMaterial.color = SCRed;
         }
-        selectionCube.transform.position = new Vector3(Mathf.RoundToInt(mousePos.x) + (isHorizontal ? ((_heldgameObject.transform.localScale.x - 1) * 0.50f) : ((_heldgameObject.transform.localScale.z - 1) * 0.50f)), 15, Mathf.RoundToInt(mousePos.z) + (isHorizontal ? ((_heldgameObject.transform.localScale.z - 1) * 0.50f) : ((_heldgameObject.transform.localScale.x - 1) * 0.50f)));
+
+        
+        Object curObject = _heldgameObject.GetComponent<Object>();
+        float xPos = isHorizontal ? ((curObject.xSize - 1) * 0.50f) : ((curObject.zSize - 1) * 0.50f);
+        float zPos = isHorizontal ? ((curObject.zSize - 1) * 0.50f) : ((curObject.xSize - 1) * 0.50f);
+        selectionCube.transform.position = new Vector3(Mathf.RoundToInt(mousePos.x) + xPos, 15, Mathf.RoundToInt(mousePos.z) + zPos);
     }
 
     private void Move()
@@ -101,7 +117,7 @@ public class CameraControl : MonoBehaviour
 
     private void RotateItem()
     {
-        selectionCube.transform.Rotate(new Vector3(0,90,0));
+        selectionCube.transform.Rotate(new Vector3(0, 90, 0), Space.World);
         isHorizontal = !isHorizontal;
     }
 
@@ -114,8 +130,12 @@ public class CameraControl : MonoBehaviour
         {
             if (hit.transform.CompareTag("Terrain") && !EventSystem.current.IsPointerOverGameObject())
             {
-                GameObject placedObj = Instantiate(_heldgameObject, new Vector3(Mathf.RoundToInt(hit.point.x) + (isHorizontal ? ((_heldgameObject.transform.localScale.x - 1) * 0.50f) : ((_heldgameObject.transform.localScale.z - 1) * 0.50f)), (_heldgameObject.transform.localScale.y / 2), Mathf.RoundToInt(hit.point.z) + (isHorizontal ? ((_heldgameObject.transform.localScale.z - 1) * 0.50f) : ((_heldgameObject.transform.localScale.x - 1) * 0.50f))), Quaternion.identity, hit.transform);
-                if (!isHorizontal) placedObj.transform.Rotate(new Vector3(0, 90, 0));
+                Object curObject = _heldgameObject.GetComponent<Object>();
+                float xPos = isHorizontal ? ((curObject.xSize - 1) * 0.50f) : ((curObject.zSize - 1) * 0.50f);
+                float zPos = isHorizontal ? ((curObject.zSize - 1) * 0.50f) : ((curObject.xSize - 1) * 0.50f);
+                GameObject placedObj = Instantiate(_heldgameObject, new Vector3(Mathf.RoundToInt(hit.point.x) + xPos, 0, Mathf.RoundToInt(hit.point.z) + zPos), Quaternion.identity, hit.transform);
+               
+                placedObj.transform.Rotate(new Vector3(0, selectionCube.transform.eulerAngles.y, 0));
                 _map.AddObject(placedObj);
             }
         }
@@ -128,7 +148,7 @@ public class CameraControl : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))
         {
-            if (hit.transform.CompareTag("Object") && !EventSystem.current.IsPointerOverGameObject())
+            if (hit.transform.gameObject.GetComponent<Object>() && !EventSystem.current.IsPointerOverGameObject())
             {
                 _map.RemoveObject(hit.transform.gameObject);
                 Destroy(hit.transform.gameObject);
@@ -136,12 +156,46 @@ public class CameraControl : MonoBehaviour
         }
     }
 
+    private void MakeSelection()
+    {
+        RaycastHit hit;
+        Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            startPos = new Vector3(Mathf.RoundToInt(hit.point.x), 15, Mathf.RoundToInt(hit.point.z));
+            selectionCube.transform.position = startPos;
+            selectionDown = true;
+        }
+    }
+
+    private void UpdateSelection()
+    {
+        RaycastHit hit;
+        Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            Vector3 newPoint = new Vector3(Mathf.RoundToInt(hit.point.x) + 1, 14, Mathf.RoundToInt(hit.point.z) - 1);
+            selectionCube.transform.localScale = startPos - newPoint;
+            selectionCube.transform.position = startPos - new Vector3((selectionCube.transform.localScale.x / 2) + 0.5f, 0, (selectionCube.transform.localScale.z / 2) - 0.5f);
+        }
+    }
+
+    private void EndSelection()
+    {
+        GameObject Area = Instantiate(AreaPrefab);
+        Area.transform.position = selectionCube.transform.position;
+        Area.transform.localScale = selectionCube.transform.localScale;
+
+        selectionDown = false;
+        Object curObject = _heldgameObject.GetComponent<Object>();
+        selectionCube.transform.localScale = new Vector3(curObject.xSize, 0.5f, curObject.zSize);
+    }
+
     public void SaveData()
     {
-        if (!Directory.Exists("Saves"))
-            Directory.CreateDirectory("Saves");
-
-        BinaryFormatter formatter = new BinaryFormatter();
-        FileStream saveFile = File.Create("Saves/" + _map.GetMapName() + ".binary");
+        string json = JsonUtility.ToJson(_map);
+        Debug.Log(json);
     }
 }
